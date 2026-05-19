@@ -4,23 +4,145 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Animation Synthwave</title>
-   <link rel="stylesheet" href="styles.css">
+   <title>Retro Animation Studio 🎬</title>
+   <link rel="stylesheet" href="styles/main.css">
+   <link rel="stylesheet" href="styles/animation.css">
+   <link rel="stylesheet" href="styles/effects.css">
+   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Press+Start+2P&display=swap"
+      rel="stylesheet">
+   <!-- Bibliothèques pour l'export -->
+   <script src="https://cdn.jsdelivr.net/npm/gif.js/dist/gif.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/whammy@1.0.1/whammy.min.js"></script>
 </head>
 
 <body>
-   <div class="container">
-      <div class="sun"></div>
-      <div class="grid"></div>
-      <div class="car">
-         <div class="car-body"></div>
-         <div class="car-top"></div>
-         <div class="car-window"></div>
-         <div class="car-wheel front"></div>
-         <div class="car-wheel back"></div>
+   <div class="app-container">
+      <header class="app-header">
+         <h1>🎬 RETRO ANIMATION STUDIO</h1>
+         <p class="subtitle">Créez des animations pixel art style années 90</p>
+         <p class="subtitle-en">Create 90s-style pixel art animations</p>
+      </header>
+
+      <div class="studio-container">
+         <!-- Barre d'outils -->
+         <div class="toolbar">
+            <div class="tool-group">
+               <button id="pencil-tool" class="tool-button active" title="Crayon / Pencil">
+                  ✏️
+               </button>
+               <button id="eraser-tool" class="tool-button" title="Gomme / Eraser">
+                  🧽
+               </button>
+               <button id="fill-tool" class="tool-button" title="Remplissage / Fill">
+                  🟫
+               </button>
+               <button id="sprite-tool" class="tool-button" title="Sprites / Sprites">
+                  🎭
+               </button>
+            </div>
+
+            <div class="tool-group">
+               <input type="color" id="color-picker" value="#ff2ced" title="Couleur / Color">
+               <input type="range" id="brush-size" min="1" max="20" value="1" title="Taille du pinceau / Brush Size">
+               <span id="brush-size-value">1</span>
+            </div>
+
+            <div class="tool-group">
+               <button id="undo-btn" class="tool-button" title="Annuler / Undo">
+                  ↩
+               </button>
+               <button id="redo-btn" class="tool-button" title="Rétablir / Redo">
+                  ↪
+               </button>
+            </div>
+
+            <div class="tool-group">
+               <button id="add-frame-btn" class="tool-button" title="Ajouter un frame / Add Frame">
+                  ➕
+               </button>
+               <button id="remove-frame-btn" class="tool-button" title="Supprimer un frame / Remove Frame">
+                  ➖
+               </button>
+               <button id="play-btn" class="tool-button" title="Lecture / Play">
+                  ▶
+               </button>
+               <button id="stop-btn" class="tool-button" title="Arrêter / Stop">
+                  ⏹
+               </button>
+            </div>
+
+            <div class="tool-group">
+               <button id="export-gif-btn" class="neon-button">Exporter GIF / Export GIF</button>
+               <button id="export-png-btn" class="neon-button">Exporter PNG / Export PNG</button>
+               <button id="theme-btn" class="neon-button">🌓 Thème / Theme</button>
+            </div>
+         </div>
+
+         <!-- Zone de dessin -->
+         <div class="canvas-container">
+            <div class="canvas-wrapper">
+               <canvas id="animation-canvas"></canvas>
+               <div class="canvas-overlay"></div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline-container">
+               <div class="timeline" id="timeline">
+                  <!-- Les frames seront ajoutés ici -->
+               </div>
+               <div class="timeline-controls">
+                  <span id="fps-value">FPS: 10</span>
+                  <input type="range" id="fps-slider" min="1" max="30" value="10">
+               </div>
+            </div>
+         </div>
+
+         <!-- Panneau des sprites -->
+         <div class="sprites-panel hidden" id="sprites-panel">
+            <h3>Sprites / Sprites</h3>
+            <div class="sprites-grid" id="sprites-grid">
+               <!-- Les sprites seront ajoutés ici -->
+            </div>
+         </div>
       </div>
    </div>
-   <script src="scripts.js"></script>
+
+   <!-- Modale d'export -->
+   <div id="export-modal" class="modal hidden">
+      <div class="modal-content">
+         <h2>Exporter l'animation / Export Animation</h2>
+         <div class="export-options">
+            <div class="option-group">
+               <label for="export-name">Nom du fichier / File Name:</label>
+               <input type="text" id="export-name" value="retro-animation">
+            </div>
+            <div class="option-group">
+               <label for="export-scale">Échelle / Scale:</label>
+               <input type="range" id="export-scale" min="1" max="5" value="2">
+               <span id="export-scale-value">2</span>
+            </div>
+         </div>
+         <div class="modal-actions">
+            <button id="confirm-export-btn" class="neon-button">Exporter / Export</button>
+            <button id="cancel-export-btn" class="neon-button">Annuler / Cancel</button>
+         </div>
+      </div>
+   </div>
+
+   <!-- Notification -->
+   <div id="notification" class="notification hidden"></div>
+
+   <!-- Sons (optionnels) -->
+   <audio id="draw-sound" src="assets/sounds/draw.wav" preload="auto"></audio>
+   <audio id="export-sound" src="assets/sounds/export.wav" preload="auto"></audio>
+
+   <script src="scripts/sprites.js"></script>
+   <script src="scripts/canvas.js"></script>
+   <script src="scripts/animation.js"></script>
+   <script src="scripts/exporter.js"></script>
+   <script src="scripts/effects.js"></script>
+   <script src="scripts/theme.js"></script>
+   <script src="scripts/app.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,15 @@
+{
+  "name": "retro-animation",
+  "version": "1.0.0",
+  "description": "Un studio d'animation rétro pour créer des animations pixel art style années 90",
+  "main": "index.html",
+  "scripts": {
+    "start": "echo \"Ouvrez index.html dans votre navigateur\""
+  },
+  "author": "Kévin Thouroude-Leroux",
+  "license": "MIT",
+  "dependencies": {
+    "gif.js": "^0.2.0",
+    "whammy": "^1.0.1"
+  }
+}
