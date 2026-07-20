@@ -1,82 +1,112 @@
-/* Effet CRT (écran cathodique) */
-.crt-effect {
-  position: relative;
-}
-
-.crt-effect::before {
-  content: '';
+/*
+ * FR : Superpositions rétro légères ; elles ne bloquent jamais les interactions.
+ * EN: Lightweight retro overlays; they never block interaction.
+ */
+.stage-effects,
+.stage-effects > span {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    linear-gradient(rgba(18, 16, 16, 0.1) 50%, rgba(0, 0, 0, 0.25) 50%),
-    linear-gradient(
-      90deg,
-      rgba(255, 0, 0, 0.06),
-      rgba(0, 255, 0, 0.02),
-      rgba(0, 0, 255, 0.06)
-    );
-  background-size:
-    100% 2px,
-    3px 100%;
-  border-radius: inherit;
+  inset: 0;
+  z-index: 2;
+  display: block;
   pointer-events: none;
-  z-index: 10;
 }
 
-/* Effet de glitch */
-.glitch-effect {
-  position: relative;
-  animation: glitch-skew 4s infinite linear alternate-reverse;
+.scanlines {
+  opacity: 0.2;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgba(0, 0, 0, 0.28) 4px
+  );
 }
 
-@keyframes glitch-skew {
+.screen-vignette {
+  background:
+    linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent 9%, transparent 91%, rgba(0, 0, 0, 0.3)),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.22), transparent 12%, transparent 84%, rgba(0, 0, 0, 0.36));
+}
+
+.noise-layer {
+  opacity: 0.045;
+  background:
+    repeating-linear-gradient(23deg, transparent 0 7px, rgba(255, 255, 255, 0.2) 8px 9px),
+    repeating-linear-gradient(117deg, transparent 0 11px, rgba(53, 231, 234, 0.16) 12px 13px);
+  animation: noise-shift 900ms steps(2, end) infinite;
+}
+
+.signal-light {
+  animation: signal-pulse 1.2s ease-in-out infinite;
+}
+
+.signal-mark span {
+  transform-origin: bottom;
+  animation: meter 1.6s ease-in-out infinite alternate;
+}
+
+.signal-mark span:nth-child(2) {
+  animation-delay: 180ms;
+}
+
+.signal-mark span:nth-child(3) {
+  animation-delay: 360ms;
+}
+
+@keyframes noise-shift {
   0% {
-    transform: skew(0deg);
+    transform: translate(0, 0);
   }
-  20% {
-    transform: skew(0deg);
+
+  50% {
+    transform: translate(-2px, 1px);
   }
-  21% {
-    transform: skew(1deg);
-  }
-  22% {
-    transform: skew(-1deg);
-  }
-  23% {
-    transform: skew(0deg);
-  }
+
   100% {
-    transform: skew(0deg);
+    transform: translate(1px, -1px);
   }
 }
-
-/* Effet de flicker (clignotement) */
-.flicker-effect {
-  animation: flicker 0.15s infinite alternate;
-}
-
-@keyframes flicker {
-  0% {
-    opacity: 0.97;
+@keyframes signal-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
   }
+
   50% {
     opacity: 1;
   }
-  100% {
-    opacity: 0.94;
+}
+
+@keyframes meter {
+  from {
+    transform: scaleY(0.72);
+  }
+
+  to {
+    transform: scaleY(1);
   }
 }
 
-/* Effet de néon */
-.neon-glow {
-  text-shadow:
-    0 0 5px var(--neon-pink),
-    0 0 10px var(--neon-pink),
-    0 0 20px var(--neon-pink);
-  box-shadow:
-    0 0 5px var(--neon-pink),
-    0 0 10px var(--neon-pink);
+:root[data-theme='light'] .scanlines {
+  opacity: 0.1;
+}
+
+:root[data-theme='light'] .screen-vignette {
+  opacity: 0.55;
+}
+
+/* FR : Les préférences système réduisent les mouvements décoratifs. */
+/* EN: System preferences reduce decorative movement. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .noise-layer,
+  .signal-light,
+  .signal-mark span {
+    animation: none !important;
+  }
 }

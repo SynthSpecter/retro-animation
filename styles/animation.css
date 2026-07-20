@@ -1,239 +1,368 @@
-.studio-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin-top: 20px;
-  gap: 20px;
-}
-
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  padding: 15px;
-  background-color: var(--bg-darker);
-  border: 1px solid var(--neon-purple);
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
-.tool-group {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  background-color: rgba(5, 217, 232, 0.1);
-  padding: 8px;
-  border-radius: 5px;
-  margin: 5px 0;
-}
-
-.tool-button {
-  background-color: transparent;
-  border: 1px solid var(--neon-blue);
-  color: var(--neon-blue);
-  width: 40px;
-  height: 40px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: all 0.2s;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.tool-button:hover {
-  background-color: rgba(5, 217, 232, 0.3);
-  box-shadow: 0 0 10px var(--neon-blue);
-}
-
-.tool-button.active {
-  background-color: var(--neon-pink);
-  border-color: var(--neon-pink);
-  color: var(--text-light);
-  box-shadow: 0 0 10px var(--neon-pink);
-}
-
-#color-picker {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-#brush-size {
-  width: 100px;
-}
-
-.canvas-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.canvas-wrapper {
+/*
+ * FR : Mise en page de l'écran animé et de ses commandes.
+ * EN: Layout for the animated screen and its controls.
+ */
+.stage-shell {
   position: relative;
-  width: fit-content;
-  margin-bottom: 20px;
-}
-
-canvas {
-  background-color: var(--bg-darker);
-  border: 2px solid var(--neon-purple);
-  border-radius: 5px;
-  image-rendering: pixelated;
-}
-
-.canvas-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(5, 217, 232, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(5, 217, 232, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
-  animation: scanlines 0.1s linear infinite;
-}
-
-@keyframes scanlines {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 0 20px;
-  }
-}
-
-.timeline-container {
-  width: 100%;
-  background-color: var(--bg-darker);
-  border: 1px solid var(--neon-purple);
-  border-radius: 10px;
-  padding: 15px;
-}
-
-.timeline {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-  min-height: 80px;
-}
-
-.timeline::-webkit-scrollbar {
-  height: 8px;
-}
-
-.timeline::-webkit-scrollbar-thumb {
-  background-color: var(--neon-purple);
-  border-radius: 4px;
-}
-
-.frame {
-  flex-shrink: 0;
-  width: 60px;
-  height: 60px;
-  background-color: rgba(5, 217, 232, 0.2);
-  border: 1px solid var(--neon-blue);
-  border-radius: 5px;
-  cursor: pointer;
-  position: relative;
+  align-self: center;
+  justify-self: center;
+  width: min(100%, calc((100svh - 176px) * 16 / 9));
+  min-width: 0;
+  aspect-ratio: 16 / 9;
+  max-height: calc(100svh - 176px);
   overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--stage-background);
+  box-shadow: 0 18px 48px var(--shadow);
+  isolation: isolate;
 }
 
-.frame.active {
-  border-color: var(--neon-pink);
-  box-shadow: 0 0 10px var(--neon-pink);
-}
-
-.frame canvas {
+#synth-canvas {
+  display: block;
   width: 100%;
   height: 100%;
-  background-color: var(--bg-darker);
-  border: none;
-  border-radius: 0;
+  background: var(--stage-background);
+  image-rendering: auto;
 }
 
-.frame-number {
+.stage-hud {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  font-size: 10px;
-  color: var(--neon-blue);
-  font-family: 'Press Start 2P', cursive;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 2px;
-  border-radius: 3px;
-}
-
-.timeline-controls {
+  inset: 0;
+  z-index: 3;
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 20px;
+  padding: 24px 26px;
+  pointer-events: none;
+}
+
+.scene-identity {
+  max-width: min(60%, 620px);
+  padding-left: 12px;
+  border-left: 2px solid var(--pink);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.62);
+}
+
+.scene-index,
+.scene-project,
+.scene-identity h2,
+.signal-readout,
+.scene-caption {
+  font-family: "Courier New", ui-monospace, monospace;
+  letter-spacing: 0;
+}
+
+.scene-index {
+  margin: 0 0 5px;
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.scene-project {
+  margin: 0;
+  color: rgba(245, 247, 255, 0.76);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.scene-identity h2 {
+  margin: 3px 0 0;
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.signal-readout {
+  display: flex;
   align-items: center;
-  margin-top: 10px;
+  gap: 7px;
+  color: rgba(245, 247, 255, 0.82);
+  font-size: 10px;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
 }
 
-.timeline-controls span {
-  font-family: 'Press Start 2P', cursive;
+.signal-light {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+}
+
+.scene-caption {
+  position: absolute;
+  right: 24px;
+  bottom: 21px;
+  left: 24px;
+  z-index: 4;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
   font-size: 12px;
-  color: var(--neon-blue);
-}
-
-.sprites-panel {
-  position: fixed;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 200px;
-  background-color: var(--bg-darker);
-  border: 2px solid var(--neon-purple);
-  border-radius: 10px;
-  padding: 15px;
-  z-index: 100;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.sprites-panel h3 {
-  font-family: 'Orbitron', sans-serif;
-  color: var(--neon-pink);
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1rem;
+  font-weight: 700;
   text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.86);
+  pointer-events: none;
 }
 
-.sprites-grid {
+/* FR : Le HUD sombre assure un contraste net sur l'étalonnage clair. */
+/* EN: A dark HUD provides strong contrast on the light color grade. */
+:root[data-theme='light'] .scene-project,
+:root[data-theme='light'] .scene-identity h2,
+:root[data-theme='light'] .signal-readout,
+:root[data-theme='light'] .scene-caption {
+  color: #14213d;
+  text-shadow: 0 1px 8px rgba(255, 255, 255, 0.94);
+}
+
+/* FR : Le transport reste compact et sépare les commandes de la progression. */
+/* EN: The transport stays compact and separates commands from progress. */
+.transport {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: auto minmax(180px, 1fr);
+  align-items: center;
+  gap: 18px;
+  min-height: 68px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-soft);
 }
 
-.sprite {
-  width: 50px;
-  height: 50px;
-  background-color: rgba(5, 217, 232, 0.2);
-  border: 1px solid var(--neon-blue);
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.2s;
+.transport-buttons {
+  gap: 6px;
 }
 
-.sprite:hover {
-  background-color: rgba(5, 217, 232, 0.4);
-  box-shadow: 0 0 10px var(--neon-blue);
+.transport-button {
+  width: 38px;
+  height: 38px;
+  font-size: 16px;
 }
 
-.sprite img {
+.play-button {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-color: var(--pink);
+  background: var(--pink);
+  color: #ffffff;
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 17px;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--pink) 32%, transparent);
+}
+
+.play-button:hover {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  color: #071018;
+}
+
+.timeline-panel {
+  min-width: 0;
+}
+
+.timeline-track {
+  position: relative;
+  height: 28px;
+  padding-top: 2px;
+}
+
+#timeline {
+  position: relative;
+  z-index: 2;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  image-rendering: pixelated;
+  height: 24px;
+  margin: 0;
+  cursor: pointer;
+  appearance: none;
+  background: transparent;
+}
+
+#timeline::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 0;
+  background:
+    linear-gradient(
+      to right,
+      var(--pink) 0,
+      var(--pink) var(--timeline-progress, 0%),
+      var(--line) var(--timeline-progress, 0%),
+      var(--line) 100%
+    );
+}
+
+#timeline::-moz-range-track {
+  height: 3px;
+  border-radius: 0;
+  background: var(--line);
+}
+
+#timeline::-moz-range-progress {
+  height: 3px;
+  background: var(--pink);
+}
+
+#timeline::-webkit-slider-thumb {
+  width: 13px;
+  height: 13px;
+  margin-top: -5px;
+  appearance: none;
+  border: 2px solid var(--surface-raised);
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--cyan) 70%, transparent);
+}
+
+#timeline::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--surface-raised);
+  border-radius: 50%;
+  background: var(--cyan);
+}
+
+.chapter-markers {
+  position: absolute;
+  inset: 0 7px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.chapter-marker {
+  position: absolute;
+  top: 9px;
+  width: 3px;
+  height: 9px;
+  padding: 0;
+  transform: translateX(-50%);
+  border: 0;
+  border-radius: 0;
+  background: var(--muted);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.chapter-marker:hover,
+.chapter-marker:focus-visible,
+.chapter-marker.is-active {
+  height: 13px;
+  background: var(--amber);
+}
+
+.time-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  color: var(--muted);
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 10px;
+}
+
+.time-row > :last-child {
+  text-align: right;
+}
+
+.now-playing {
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* FR : Le mode plein écran conserve les commandes et maximise l'image. */
+/* EN: Fullscreen mode keeps controls while maximizing the picture. */
+.experience:fullscreen {
+  width: 100%;
+  max-width: none;
+  padding: 12px 18px;
+  background: var(--page);
+}
+
+.experience:fullscreen .stage-shell {
+  width: min(100%, calc((100svh - 168px) * 16 / 9));
+  max-height: calc(100svh - 168px);
+}
+
+@media (max-width: 720px) {
+  .stage-shell {
+    width: 100%;
+    max-height: none;
+  }
+
+  .stage-hud {
+    padding: 14px;
+  }
+
+  .scene-identity {
+    max-width: 72%;
+    padding-left: 8px;
+  }
+
+  .scene-index {
+    margin-bottom: 2px;
+    font-size: 9px;
+  }
+
+  .scene-project {
+    font-size: 8px;
+  }
+
+  .scene-identity h2 {
+    margin-top: 2px;
+    font-size: 15px;
+  }
+
+  .signal-readout {
+    font-size: 8px;
+  }
+
+  .scene-caption {
+    right: 12px;
+    bottom: 10px;
+    left: 12px;
+    font-size: 9px;
+  }
+
+  .transport {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 9px 6px;
+  }
+
+  .transport-buttons {
+    justify-content: center;
+  }
+
+  .timeline-panel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .transport-buttons {
+    gap: 4px;
+  }
+
+  .transport-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .play-button {
+    width: 42px;
+    height: 42px;
+  }
+
+  .signal-readout {
+    display: none;
+  }
+
+  .scene-identity {
+    max-width: 88%;
+  }
 }

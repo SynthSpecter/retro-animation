@@ -1,148 +1,249 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!doctype html>
+<html lang="fr" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Synthverse, une anthologie animée synthwave des projets de SynthSpecter."
+    />
+    <meta name="theme-color" content="#080b14" />
+    <title>Synthverse | Retro Animation</title>
 
-<head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Retro Animation Studio 🎬</title>
-   <link rel="stylesheet" href="styles/main.css">
-   <link rel="stylesheet" href="styles/animation.css">
-   <link rel="stylesheet" href="styles/effects.css">
-   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Press+Start+2P&display=swap"
-      rel="stylesheet">
-   <!-- Bibliothèques pour l'export -->
-   <script src="https://cdn.jsdelivr.net/npm/gif.js/dist/gif.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/whammy@1.0.1/whammy.min.js"></script>
-</head>
+    <!-- FR : Les styles sont locaux afin que l'animation fonctionne aussi hors ligne. -->
+    <!-- EN: Styles are local so the animation also works offline. -->
+    <link rel="stylesheet" href="styles/main.css" />
+    <link rel="stylesheet" href="styles/animation.css" />
+    <link rel="stylesheet" href="styles/effects.css" />
 
-<body>
-   <div class="app-container">
-      <header class="app-header">
-         <h1>🎬 RETRO ANIMATION STUDIO</h1>
-         <p class="subtitle">Créez des animations pixel art style années 90</p>
-         <p class="subtitle-en">Create 90s-style pixel art animations</p>
+    <script>
+      /*
+       * FR : Le thème sauvegardé est appliqué avant l'affichage pour éviter un flash.
+       * EN: The saved theme is applied before paint to prevent a visual flash.
+       */
+      try {
+        const savedTheme = localStorage.getItem('retro-animation-theme')
+        document.documentElement.dataset.theme =
+          savedTheme === 'light' ? 'light' : 'dark'
+      } catch {
+        document.documentElement.dataset.theme = 'dark'
+      }
+    </script>
+  </head>
+
+  <body>
+    <!-- FR : Ce lien permet aux utilisateurs du clavier d'atteindre directement l'animation. -->
+    <!-- EN: This link lets keyboard users jump straight to the animation. -->
+    <a class="skip-link" href="#animation-stage" data-i18n="skipToAnimation">
+      Aller à l'animation
+    </a>
+
+    <main class="experience" id="app">
+      <!-- FR : L'en-tête identifie l'œuvre et regroupe les réglages globaux. -->
+      <!-- EN: The header identifies the piece and gathers global settings. -->
+      <header class="topbar">
+        <div class="brand-lockup" aria-label="Retro Animation">
+          <span class="signal-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+          <div>
+            <p class="brand-kicker">RETRO ANIMATION // 02</p>
+            <h1>SYNTHVERSE</h1>
+          </div>
+        </div>
+
+        <div class="topbar-actions" aria-label="Réglages" data-i18n-aria="settings">
+          <button
+            class="text-button"
+            id="language-button"
+            type="button"
+            aria-label="Afficher en anglais"
+            title="Afficher en anglais"
+          >
+            <span aria-hidden="true">FR</span>
+            <span class="language-divider" aria-hidden="true">/</span>
+            <strong id="language-target">EN</strong>
+          </button>
+
+          <button
+            class="icon-button"
+            id="theme-button"
+            type="button"
+            aria-label="Activer le thème clair"
+            title="Activer le thème clair"
+          >
+            <span id="theme-icon" aria-hidden="true">◐</span>
+          </button>
+
+          <button
+            class="icon-button"
+            id="fullscreen-button"
+            type="button"
+            aria-label="Plein écran"
+            title="Plein écran"
+          >
+            <span aria-hidden="true">⛶</span>
+          </button>
+        </div>
       </header>
 
-      <div class="studio-container">
-         <!-- Barre d'outils -->
-         <div class="toolbar">
-            <div class="tool-group">
-               <button id="pencil-tool" class="tool-button active" title="Crayon / Pencil">
-                  ✏️
-               </button>
-               <button id="eraser-tool" class="tool-button" title="Gomme / Eraser">
-                  🧽
-               </button>
-               <button id="fill-tool" class="tool-button" title="Remplissage / Fill">
-                  🟫
-               </button>
-               <button id="sprite-tool" class="tool-button" title="Sprites / Sprites">
-                  🎭
-               </button>
-            </div>
+      <!-- FR : Le canvas 16:9 contient le film ; le HUD reste lisible au-dessus. -->
+      <!-- EN: The 16:9 canvas holds the film; the HUD remains readable above it. -->
+      <section
+        class="stage-shell"
+        id="animation-stage"
+        aria-labelledby="scene-title"
+      >
+        <canvas
+          id="synth-canvas"
+          width="1600"
+          height="900"
+          role="img"
+          tabindex="0"
+          aria-label="Animation Synthverse"
+          data-i18n-aria="canvasLabel"
+        >
+          Votre navigateur ne prend pas en charge Canvas. Your browser does not
+          support Canvas.
+        </canvas>
 
-            <div class="tool-group">
-               <input type="color" id="color-picker" value="#ff2ced" title="Couleur / Color">
-               <input type="range" id="brush-size" min="1" max="20" value="1" title="Taille du pinceau / Brush Size">
-               <span id="brush-size-value">1</span>
-            </div>
+        <div class="stage-effects" aria-hidden="true">
+          <span class="scanlines"></span>
+          <span class="screen-vignette"></span>
+          <span class="noise-layer"></span>
+        </div>
 
-            <div class="tool-group">
-               <button id="undo-btn" class="tool-button" title="Annuler / Undo">
-                  ↩
-               </button>
-               <button id="redo-btn" class="tool-button" title="Rétablir / Redo">
-                  ↪
-               </button>
-            </div>
+        <div class="stage-hud" aria-hidden="true">
+          <div class="scene-identity">
+            <p class="scene-index" id="scene-index">01 / 13</p>
+            <p class="scene-project" id="scene-project">RETRO ANIMATION</p>
+            <h2 id="scene-title">Initialisation</h2>
+          </div>
 
-            <div class="tool-group">
-               <button id="add-frame-btn" class="tool-button" title="Ajouter un frame / Add Frame">
-                  ➕
-               </button>
-               <button id="remove-frame-btn" class="tool-button" title="Supprimer un frame / Remove Frame">
-                  ➖
-               </button>
-               <button id="play-btn" class="tool-button" title="Lecture / Play">
-                  ▶
-               </button>
-               <button id="stop-btn" class="tool-button" title="Arrêter / Stop">
-                  ⏹
-               </button>
-            </div>
+          <div class="signal-readout">
+            <span class="signal-light"></span>
+            <span data-i18n="liveSignal">SIGNAL ACTIF</span>
+          </div>
+        </div>
 
-            <div class="tool-group">
-               <button id="export-gif-btn" class="neon-button">Exporter GIF / Export GIF</button>
-               <button id="export-png-btn" class="neon-button">Exporter PNG / Export PNG</button>
-               <button id="theme-btn" class="neon-button">🌓 Thème / Theme</button>
-            </div>
-         </div>
+        <p class="scene-caption" id="scene-caption" aria-hidden="true">
+          Quatorze projets. Un même horizon.
+        </p>
+      </section>
 
-         <!-- Zone de dessin -->
-         <div class="canvas-container">
-            <div class="canvas-wrapper">
-               <canvas id="animation-canvas"></canvas>
-               <div class="canvas-overlay"></div>
-            </div>
+      <!-- FR : Le transport contrôle l'œuvre sans transformer l'écran en éditeur. -->
+      <!-- EN: The transport controls the piece without turning the screen into an editor. -->
+      <footer class="transport">
+        <div class="transport-buttons" role="group" aria-label="Lecture" data-i18n-aria="playback">
+          <button
+            class="icon-button transport-button"
+            id="restart-button"
+            type="button"
+            aria-label="Recommencer"
+            title="Recommencer"
+          >
+            <span aria-hidden="true">↺</span>
+          </button>
 
-            <!-- Timeline -->
-            <div class="timeline-container">
-               <div class="timeline" id="timeline">
-                  <!-- Les frames seront ajoutés ici -->
-               </div>
-               <div class="timeline-controls">
-                  <span id="fps-value">FPS: 10</span>
-                  <input type="range" id="fps-slider" min="1" max="30" value="10">
-               </div>
-            </div>
-         </div>
+          <button
+            class="icon-button transport-button"
+            id="previous-button"
+            type="button"
+            aria-label="Chapitre précédent"
+            title="Chapitre précédent"
+          >
+            <span aria-hidden="true">◀</span>
+          </button>
 
-         <!-- Panneau des sprites -->
-         <div class="sprites-panel hidden" id="sprites-panel">
-            <h3>Sprites / Sprites</h3>
-            <div class="sprites-grid" id="sprites-grid">
-               <!-- Les sprites seront ajoutés ici -->
-            </div>
-         </div>
-      </div>
-   </div>
+          <button
+            class="play-button"
+            id="play-button"
+            type="button"
+            aria-label="Mettre en pause"
+            title="Mettre en pause"
+          >
+            <span id="play-icon" aria-hidden="true">Ⅱ</span>
+          </button>
 
-   <!-- Modale d'export -->
-   <div id="export-modal" class="modal hidden">
-      <div class="modal-content">
-         <h2>Exporter l'animation / Export Animation</h2>
-         <div class="export-options">
-            <div class="option-group">
-               <label for="export-name">Nom du fichier / File Name:</label>
-               <input type="text" id="export-name" value="retro-animation">
-            </div>
-            <div class="option-group">
-               <label for="export-scale">Échelle / Scale:</label>
-               <input type="range" id="export-scale" min="1" max="5" value="2">
-               <span id="export-scale-value">2</span>
-            </div>
-         </div>
-         <div class="modal-actions">
-            <button id="confirm-export-btn" class="neon-button">Exporter / Export</button>
-            <button id="cancel-export-btn" class="neon-button">Annuler / Cancel</button>
-         </div>
-      </div>
-   </div>
+          <button
+            class="icon-button transport-button"
+            id="next-button"
+            type="button"
+            aria-label="Chapitre suivant"
+            title="Chapitre suivant"
+          >
+            <span aria-hidden="true">▶</span>
+          </button>
 
-   <!-- Notification -->
-   <div id="notification" class="notification hidden"></div>
+          <button
+            class="icon-button transport-button"
+            id="sound-button"
+            type="button"
+            aria-pressed="false"
+            aria-label="Activer le son"
+            title="Activer le son"
+          >
+            <span id="sound-icon" aria-hidden="true">♪</span>
+          </button>
 
-   <!-- Sons (optionnels) -->
-   <audio id="draw-sound" src="assets/sounds/draw.wav" preload="auto"></audio>
-   <audio id="export-sound" src="assets/sounds/export.wav" preload="auto"></audio>
+          <button
+            class="icon-button transport-button"
+            id="snapshot-button"
+            type="button"
+            aria-label="Capturer l'image"
+            title="Capturer l'image"
+          >
+            <span aria-hidden="true">▣</span>
+          </button>
+        </div>
 
-   <script src="scripts/sprites.js"></script>
-   <script src="scripts/canvas.js"></script>
-   <script src="scripts/animation.js"></script>
-   <script src="scripts/exporter.js"></script>
-   <script src="scripts/effects.js"></script>
-   <script src="scripts/theme.js"></script>
-   <script src="scripts/app.js"></script>
-</body>
+        <div class="timeline-panel">
+          <label class="visually-hidden" for="timeline" data-i18n="timelineLabel">
+            Position dans l'animation
+          </label>
+          <div class="timeline-track">
+            <input
+              id="timeline"
+              type="range"
+              min="0"
+              max="1000"
+              step="1"
+              value="0"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            />
+            <div class="chapter-markers" id="chapter-markers"></div>
+          </div>
+          <div class="time-row" aria-hidden="true">
+            <span id="elapsed-time">00:00</span>
+            <span class="now-playing" id="now-playing">RETRO ANIMATION</span>
+            <span id="total-time">01:09</span>
+          </div>
+        </div>
+      </footer>
 
+      <!-- FR : Les changements importants sont annoncés aux lecteurs d'écran. -->
+      <!-- EN: Important changes are announced to screen readers. -->
+      <p class="visually-hidden" id="live-region" aria-live="polite"></p>
+    </main>
+
+    <noscript>
+      Cette animation nécessite JavaScript. This animation requires JavaScript.
+    </noscript>
+
+    <!-- FR : Les scripts classiques gardent le projet compatible avec une ouverture directe. -->
+    <!-- EN: Classic scripts keep the project compatible with direct file opening. -->
+    <script src="scripts/translations.js"></script>
+    <script src="scripts/theme.js"></script>
+    <script src="scripts/effects.js"></script>
+    <script src="scripts/sprites.js"></script>
+    <script src="scripts/canvas.js"></script>
+    <script src="scripts/animation.js"></script>
+    <script src="scripts/audio.js"></script>
+    <script src="scripts/exporter.js"></script>
+    <script src="scripts/app.js"></script>
+  </body>
 </html>

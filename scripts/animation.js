@@ -1,181 +1,159 @@
 /**
- * Gère l'animation (frames, timeline, lecture).
+ * FR : Chapitres, durées et ordre narratif du film.
+ * EN: Chapters, durations and narrative order of the film.
  */
-class AnimationManager {
-  constructor() {
-    this.frames = []
-    this.currentFrameIndex = 0
-    this.isPlaying = false
-    this.animationInterval = null
-    this.fps = 10
-    this.timeline = document.getElementById('timeline')
-    this.fpsSlider = document.getElementById('fps-slider')
-    this.fpsValue = document.getElementById('fps-value')
+const SYNTH_SCENES = [
+  { id: 'origin', project: 'RETRO ANIMATION', duration: 5 },
+  { id: 'bank', project: 'BANK-WAVE', duration: 5 },
+  { id: 'run', project: 'SYNTH-RUN', duration: 5 },
+  { id: 'shoot', project: 'SYNTH-SHOOT', duration: 5 },
+  { id: 'mine', project: 'SYNTH-MINESWEEPER', duration: 5 },
+  { id: 'weather', project: 'SYNTH-WEATHER-APP', duration: 5 },
+  { id: 'news', project: 'AGRETATOR', duration: 5 },
+  { id: 'tanks', project: 'ANGRY-TANKS', duration: 5 },
+  { id: 'browser', project: 'BROWSER-CLASSING', duration: 5 },
+  { id: 'vital', project: 'DIET', duration: 5 },
+  {
+    id: 'logic',
+    project: 'CALCULATOR // PASSWORD // QR',
+    duration: 6,
+  },
+  { id: 'arcade', project: 'FORCE-FOUR // SYNTH-PENDU', duration: 6 },
+  { id: 'finale', project: 'SYNTHSPECTER ARCHIVE', duration: 7 },
+]
 
-    this.setupEventListeners()
-    this.addFrame() // Ajoute un premier frame vide
+/**
+ * FR : La chronologie pilote le temps, les chapitres et le rendu Canvas.
+ * EN: The timeline drives time, chapters and Canvas rendering.
+ */
+class SynthTimeline {
+  constructor(renderer, onUpdate, options = {}) {
+    this.renderer = renderer
+    this.onUpdate = onUpdate
+    this.scenes = SYNTH_SCENES.map((scene) => ({ ...scene }))
+    this.duration = this.scenes.reduce((total, scene) => total + scene.duration, 0)
+    this.currentTime = 0
+    this.isPlaying = options.autoplay !== false
+    this.lastTimestamp = 0
+    this.frameRequest = 0
+
+    // FR : Le point de départ de chaque chapitre accélère toutes les recherches.
+    // EN: Each chapter's start time speeds up every lookup.
+    let elapsed = 0
+    this.scenes.forEach((scene) => {
+      scene.start = elapsed
+      elapsed += scene.duration
+    })
+
+    this.loop = this.loop.bind(this)
   }
 
   /**
-   * Configure les écouteurs d'événements.
+   * FR : Lance la boucle de rendu une seule fois.
+   * EN: Starts the rendering loop exactly once.
    */
-  setupEventListeners() {
-    // Ajouter un frame
-    document
-      .getElementById('add-frame-btn')
-      .addEventListener('click', () => this.addFrame())
+  start() {
+    if (this.frameRequest) {
+      return
+    }
 
-    // Supprimer un frame
-    document
-      .getElementById('remove-frame-btn')
-      .addEventListener('click', () => this.removeFrame())
+    this.lastTimestamp = performance.now()
+    this.frameRequest = requestAnimationFrame(this.loop)
+  }
 
-    // Lecture
-    document
-      .getElementById('play-btn')
-      .addEventListener('click', () => this.play())
+  /**
+   * FR : Limite le delta pour éviter un grand saut au retour d'un onglet caché.
+   * EN: Caps delta time to avoid a large jump after returning to a hidden tab.
+   */
+  loop(timestamp) {
+    const delta = Math.min(
+      0.05,
+      Math.max(0, (timestamp - this.lastTimestamp) / 1000),
+    )
+    this.lastTimestamp = timestamp
 
-    // Arrêt
-    document
-      .getElementById('stop-btn')
-      .addEventListener('click', () => this.stop())
+    if (this.isPlaying) {
+      this.currentTime = (this.currentTime + delta) % this.duration
+    }
 
-    // Changement de FPS
-    this.fpsSlider.addEventListener('input', () => {
-      this.fps = parseInt(this.fpsSlider.value)
-      this.fpsValue.textContent = `FPS: ${this.fps}`
-      if (this.isPlaying) {
-        this.stop()
-        this.play()
+    const state = this.getState()
+    this.renderer.render(state)
+    this.onUpdate(state)
+    this.frameRequest = requestAnimationFrame(this.loop)
+  }
+
+  getState() {
+    let sceneIndex = this.scenes.length - 1
+
+    for (let index = 0; index < this.scenes.length; index += 1) {
+      const scene = this.scenes[index]
+      if (this.currentTime < scene.start + scene.duration) {
+        sceneIndex = index
+        break
       }
-    })
-  }
-
-  /**
-   * Ajoute un nouveau frame.
-   */
-  addFrame() {
-    // Sauvegarde le frame actuel
-    this.frames.push(canvasManager.getFrameData())
-    this.currentFrameIndex = this.frames.length - 1
-    this.updateTimeline()
-  }
-
-  /**
-   * Supprime le frame actuel.
-   */
-  removeFrame() {
-    if (this.frames.length <= 1) {
-      showNotification(
-        'Impossible de supprimer le dernier frame / Cannot remove the last frame',
-        'error',
-      )
-      return
     }
 
-    this.frames.splice(this.currentFrameIndex, 1)
-    if (this.currentFrameIndex >= this.frames.length) {
-      this.currentFrameIndex = this.frames.length - 1
+    const scene = this.scenes[sceneIndex]
+
+    return {
+      globalTime: this.currentTime,
+      localTime: this.currentTime - scene.start,
+      progress: this.currentTime / this.duration,
+      scene,
+      sceneIndex,
+      sceneStart: scene.start,
+      totalDuration: this.duration,
+      isPlaying: this.isPlaying,
     }
-    this.updateTimeline()
-    this.loadFrame(this.currentFrameIndex)
   }
 
-  /**
-   * Met à jour la timeline.
-   */
-  updateTimeline() {
-    this.timeline.innerHTML = ''
-    this.frames.forEach((frame, index) => {
-      const frameElement = document.createElement('div')
-      frameElement.className = `frame ${index === this.currentFrameIndex ? 'active' : ''}`
-      frameElement.dataset.index = index
-
-      const frameCanvas = document.createElement('canvas')
-      frameCanvas.width = 60
-      frameCanvas.height = 60
-      const frameCtx = frameCanvas.getContext('2d')
-      frameCtx.imageSmoothingEnabled = false
-      frameCtx.putImageData(frame, 0, 0, 0, 0, 60, 60)
-
-      frameElement.appendChild(frameCanvas)
-
-      const frameNumber = document.createElement('div')
-      frameNumber.className = 'frame-number'
-      frameNumber.textContent = index + 1
-
-      frameElement.appendChild(frameNumber)
-
-      frameElement.addEventListener('click', () => this.loadFrame(index))
-      this.timeline.appendChild(frameElement)
-    })
+  toggle() {
+    this.isPlaying = !this.isPlaying
+    return this.isPlaying
   }
 
-  /**
-   * Charge un frame.
-   * @param {number} index - Index du frame à charger.
-   */
-  loadFrame(index) {
-    if (index < 0 || index >= this.frames.length) return
-
-    this.currentFrameIndex = index
-    canvasManager.drawFrame(this.frames[index])
-    this.updateTimeline()
-  }
-
-  /**
-   * Joue l'animation.
-   */
   play() {
-    if (this.frames.length <= 1) {
-      showNotification(
-        "Ajoutez plus de frames pour jouer l'animation / Add more frames to play the animation",
-        'error',
-      )
-      return
-    }
-
-    if (this.isPlaying) return
-
     this.isPlaying = true
-    const delay = 1000 / this.fps
-
-    this.animationInterval = setInterval(() => {
-      this.currentFrameIndex = (this.currentFrameIndex + 1) % this.frames.length
-      canvasManager.drawFrame(this.frames[this.currentFrameIndex])
-      this.updateTimeline()
-    }, delay)
   }
 
-  /**
-   * Arrête l'animation.
-   */
-  stop() {
-    if (!this.isPlaying) return
-
-    clearInterval(this.animationInterval)
+  pause() {
     this.isPlaying = false
   }
 
-  /**
-   * Retourne les frames de l'animation.
-   * @returns {Array<ImageData>} - Tableau des frames.
-   */
-  getFrames() {
-    return this.frames
+  restart() {
+    this.currentTime = 0
+    this.play()
   }
 
   /**
-   * Définit les frames de l'animation.
-   * @param {Array<ImageData>} frames - Tableau des frames.
+   * FR : Place la tête de lecture dans les limites du film.
+   * EN: Places the playhead within the film bounds.
    */
-  setFrames(frames) {
-    this.frames = frames
-    this.currentFrameIndex = 0
-    this.updateTimeline()
-    this.loadFrame(0)
+  seek(time) {
+    this.currentTime = SynthEffects.clamp(time, 0, this.duration - 0.001)
+    this.lastTimestamp = performance.now()
+  }
+
+  seekNormalized(progress) {
+    this.seek(SynthEffects.clamp(progress) * this.duration)
+  }
+
+  jumpToScene(index) {
+    const safeIndex = (index + this.scenes.length) % this.scenes.length
+    this.seek(this.scenes[safeIndex].start + 0.01)
+  }
+
+  nextScene() {
+    const { sceneIndex } = this.getState()
+    this.jumpToScene(sceneIndex + 1)
+  }
+
+  previousScene() {
+    const { sceneIndex, localTime } = this.getState()
+    const targetIndex = localTime > 1.5 ? sceneIndex : sceneIndex - 1
+    this.jumpToScene(targetIndex)
   }
 }
 
-// Crée une instance globale du gestionnaire d'animation
-const animationManager = new AnimationManager()
+window.SYNTH_SCENES = SYNTH_SCENES
+window.SynthTimeline = SynthTimeline

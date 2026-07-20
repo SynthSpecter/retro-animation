@@ -1,55 +1,50 @@
 /**
- * Gère le thème (sombre/clair) et les effets visuels.
+ * FR : Contrôleur du thème clair/sombre avec persistance locale.
+ * EN: Light/dark theme controller with local persistence.
  */
-document.addEventListener('DOMContentLoaded', () => {
-  /**
-   * Met à jour le texte du bouton de thème.
-   */
-  function updateThemeButton() {
-    const themeBtn = document.getElementById('theme-btn')
-    if (!themeBtn) return
-
-    const isDarkMode = document.body.classList.contains('dark-mode')
-    themeBtn.textContent = isDarkMode ? '☀️ Thème / Theme' : '🌙 Thème / Theme'
+class ThemeController {
+  constructor(button) {
+    this.button = button
+    this.root = document.documentElement
+    this.metaTheme = document.querySelector('meta[name="theme-color"]')
+    this.theme = this.root.dataset.theme === 'light' ? 'light' : 'dark'
+    this.apply(this.theme, false)
   }
 
   /**
-   * Toggle le thème entre sombre et clair.
+   * FR : Applique le thème et avertit le moteur Canvas.
+   * EN: Applies the theme and notifies the Canvas engine.
    */
-  function toggleTheme() {
-    const body = document.body
-    if (body.classList.contains('dark-mode')) {
-      body.classList.remove('dark-mode')
-      body.classList.add('light-mode')
-      localStorage.setItem('theme', 'light')
-    } else {
-      body.classList.remove('light-mode')
-      body.classList.add('dark-mode')
-      localStorage.setItem('theme', 'dark')
+  apply(theme, persist = true) {
+    this.theme = theme === 'light' ? 'light' : 'dark'
+    this.root.dataset.theme = this.theme
+
+    if (this.metaTheme) {
+      this.metaTheme.content = this.theme === 'light' ? '#e9edf5' : '#060810'
     }
-    updateThemeButton()
+
+    if (persist) {
+      try {
+        localStorage.setItem('retro-animation-theme', this.theme)
+      } catch {
+        // FR : Le stockage peut être indisponible en navigation privée.
+        // EN: Storage may be unavailable in private browsing.
+      }
+    }
+
+    window.dispatchEvent(
+      new CustomEvent('retrothemechange', { detail: { theme: this.theme } }),
+    )
   }
 
   /**
-   * Charge le thème sauvegardé.
+   * FR : Bascule entre les deux étalonnages colorimétriques.
+   * EN: Toggles between both color grades.
    */
-  function loadTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'dark'
-    const body = document.body
-    if (savedTheme === 'light') {
-      body.classList.add('light-mode')
-    } else {
-      body.classList.add('dark-mode')
-    }
-    updateThemeButton()
+  toggle() {
+    this.apply(this.theme === 'dark' ? 'light' : 'dark')
+    return this.theme
   }
+}
 
-  // Initialise le thème
-  loadTheme()
-
-  // Ajoute l'écouteur pour le bouton de thème
-  const themeBtn = document.getElementById('theme-btn')
-  if (themeBtn) {
-    themeBtn.addEventListener('click', toggleTheme)
-  }
-})
+window.ThemeController = ThemeController
